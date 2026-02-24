@@ -1,4 +1,14 @@
 /**
+ * 
+  Ei! 👋
+  Se você está fuçando o código por aqui e tiver qualquer dúvida,
+  sugestão ou só quiser trocar uma ideia sobre a implementação,
+  me chama! Vou curtir conversar com você 😄
+
+  Obs: o data-theme NÃO fica aqui.
+  O INLINE_SNIPPET no <head> aplica o tema antes do primeiro paint,
+  evitando o famoso flash de tema (FOUC) sem precisar deixar nada hardcoded.
+
  * APP.JS — ANALIST.COM
  *
  * DEPENDÊNCIAS:
