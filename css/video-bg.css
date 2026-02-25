@@ -1,0 +1,193 @@
+/* ============================================================================
+   VIDEO-BG.CSS — ANALIST.COM
+   Vídeo de fundo no hero — sem quebrar o sistema existente
+   
+   Carregue após ios-patch.css:
+   <link rel="stylesheet" href="css/video-bg.css">
+   ============================================================================ */
+
+
+/* ─────────────────────────────────────────────────
+   HERO — contexto de empilhamento
+   
+   O hero já existe no layout.css.
+   Apenas garantimos position: relative e z-index
+   para o sistema de camadas funcionar.
+───────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  isolation: isolate; /* cria stacking context sem z-index no pai */
+}
+
+
+/* ─────────────────────────────────────────────────
+   CAMADA 0 — container do vídeo
+   
+   Posição absoluta, cobre todo o hero,
+   fica atrás de tudo via z-index: -1.
+───────────────────────────────────────────────── */
+.hero__video-bg {
+  position: absolute;
+  inset: 0;                    /* top/right/bottom/left: 0 */
+  z-index: -1;
+  overflow: hidden;            /* garante que o vídeo não vaze */
+  pointer-events: none;        /* cliques passam direto para o conteúdo */
+}
+
+
+/* ─────────────────────────────────────────────────
+   VÍDEO — cobre o container como object-fit: cover
+───────────────────────────────────────────────── */
+.hero__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;           /* preenche sem distorcer */
+  object-position: center;
+
+  /* Leve desfoque para não competir com o texto */
+  filter: blur(0px) brightness(0.6);
+
+  /* GPU compositing — vídeo sempre se beneficia */
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+
+/* ─────────────────────────────────────────────────
+   OVERLAY — garante legibilidade do texto
+   
+   Gradiente ao invés de cor sólida:
+   mais escuro embaixo (onde estão os stats)
+   mais transparente no centro.
+───────────────────────────────────────────────── */
+.hero__video-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--void) 55%, transparent) 0%,
+    color-mix(in srgb, var(--void) 40%, transparent) 50%,
+    color-mix(in srgb, var(--void) 70%, transparent) 100%
+  );
+
+  /* Versão dark mode: overlay mais leve (vídeo já é escuro) */
+  [data-theme="dark"] & {
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--void) 45%, transparent) 0%,
+      color-mix(in srgb, var(--void) 30%, transparent) 50%,
+      color-mix(in srgb, var(--void) 60%, transparent) 100%
+    );
+  }
+}
+
+
+/* ─────────────────────────────────────────────────
+   CONTEÚDO — garante que texto fique legível
+   sobre o vídeo escurecido
+───────────────────────────────────────────────── */
+.hero__content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero__visual {
+  position: relative;
+  z-index: 1;
+}
+
+.scroll-indicator {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ajusta cores do texto para contraste sobre vídeo escuro */
+.hero .hero__heading,
+.hero .hero__subheading,
+.hero .hero__kicker {
+  color: var(--analist-white);
+}
+
+.hero .hero__stat-value {
+  color: var(--analist-white);
+}
+
+.hero .hero__stat-label {
+  color: color-mix(in srgb, var(--analist-white) 70%, transparent);
+}
+
+/* Words: cor de acento mais viva sobre fundo escuro */
+.hero .hero__words {
+  color: var(--brand-accent);
+}
+
+/* Mark dentro do heading: contraste invertido sobre escuro */
+.hero h1 mark {
+  background: var(--brand-accent);
+  color: var(--analist-white);
+  padding-inline: var(--space-1);
+}
+
+/* Underline no heading */
+.hero h1 u {
+  text-decoration-color: var(--brand-accent);
+  text-decoration-thickness: var(--border-width-brutal);
+  text-underline-offset: 0.15em;
+}
+
+/* Stats: linha separadora clara sobre escuro */
+.hero__stats {
+  border-top-color: color-mix(in srgb, var(--analist-white) 20%, transparent);
+}
+
+
+/* ─────────────────────────────────────────────────
+   MOBILE — pausa vídeo em conexões lentas
+   
+   Em telas pequenas o vídeo de fundo compete com
+   a performance. Exibe apenas o poster.
+───────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .hero__video {
+    /* Pausa no mobile — poster fica visível */
+    display: none;
+  }
+
+  /* Overlay mais denso no mobile para cobrir o poster */
+  .hero__video-overlay {
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--void) 70%, transparent) 0%,
+      color-mix(in srgb, var(--void) 60%, transparent) 100%
+    );
+  }
+}
+
+
+/* ─────────────────────────────────────────────────
+   REDUCED-MOTION — sem vídeo em movimento
+   
+   prefers-reduced-motion: reduce → pausa o vídeo.
+   O poster continua visível como imagem estática.
+───────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .hero__video {
+    display: none; /* poster do <video> fica como background estático */
+  }
+}
+
+
+/* ─────────────────────────────────────────────────
+   POSTER FALLBACK
+   
+   Quando o vídeo não carrega (sem JS, conexão lenta,
+   reduced-motion, mobile), o poster é exibido
+   como background image do container.
+───────────────────────────────────────────────── */
+.hero__video-bg {
+  background-image: url('../images/logoanalisti1-Photoroom.png');
+  background-size: cover;
+  background-position: center;
+}

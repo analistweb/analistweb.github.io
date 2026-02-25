@@ -1,0 +1,321 @@
+/* ============================================================================
+   IOS-PATCH.CSS — ANALIST.COM
+   Correções específicas para Safari / iOS
+   
+   Carregue APÓS todos os outros CSS:
+   <link rel="stylesheet" href="css/ios-patch.css">
+   
+   Problemas resolvidos:
+   1. Scroll travado (overflow-x: hidden no html/body)
+   2. Sticky header quebrando no iOS
+   3. Drawer clip-path sem aceleração de hardware
+   4. Container queries: fallback para iOS < 16
+   5. 100svh: fallback para iOS < 15.4
+   6. Touch scroll momentum
+   7. Tap highlight nos botões
+   ============================================================================ */
+
+
+/* ─────────────────────────────────────────────────
+   1. SCROLL — a correção mais importante
+   
+   overflow-x: hidden no html quebra position: sticky
+   e trava o scroll no iOS Safari.
+   
+   Solução: overflow só no body, nunca no html.
+   O wrapper .overflow-guard intercepta o overflow
+   horizontal sem afetar o scroll vertical.
+───────────────────────────────────────────────── */
+html {
+  overflow: visible; /* remove o overflow-x: hidden do html */
+  /* iOS momentum scroll */
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  overflow-x: clip; /* mais seguro que hidden no iOS — não cria stacking context */
+  overflow-y: auto;
+  /* Garante que o body seja o scroll container */
+  position: relative;
+}
+
+/* ─────────────────────────────────────────────────
+   2. HEADER STICKY — fix para iOS Safari
+   
+   position: sticky falha quando qualquer ancestral
+   tem overflow diferente de visible.
+   Com o fix acima no html isso já melhora,
+   mas garantimos com -webkit-sticky.
+───────────────────────────────────────────────── */
+.header {
+  position: -webkit-sticky;
+  position: sticky;
+  /* Garante que o header fique acima do conteúdo */
+  isolation: isolate;
+}
+
+/* ─────────────────────────────────────────────────
+   3. DRAWER — aceleração de hardware no iOS
+   
+   clip-path sem transform3d não usa GPU no iOS.
+   Adicionamos transform para forçar compositing layer.
+───────────────────────────────────────────────── */
+.navbar__drawer {
+  /* Força compositing layer para animar clip-path com GPU */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  /* Scroll interno do drawer no iOS */
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+/* ─────────────────────────────────────────────────
+   4. BOTÕES E LINKS — remove tap highlight azul do iOS
+───────────────────────────────────────────────── */
+a,
+button,
+[role="button"],
+.btn,
+.navbar__link,
+.navbar__drawer-link,
+.social-link,
+.whatsapp-btn {
+  -webkit-tap-highlight-color: transparent;
+  /* Garante área de toque mínima de 44px (HIG Apple) */
+  min-height: 44px;
+  touch-action: manipulation; /* remove delay de 300ms no tap */
+}
+
+/* Exceção: itens inline não precisam de min-height */
+.navbar__link,
+.footer__link,
+.ticker-item {
+  min-height: unset;
+}
+
+/* ─────────────────────────────────────────────────
+   5. VIEWPORT HEIGHT — fallback para iOS < 15.4
+   
+   100svh não existe antes do iOS 15.4.
+   Usamos custom property com fallback via JS
+   ou o valor calculado pelo browser.
+───────────────────────────────────────────────── */
+
+/* Fallback se svh não for suportado */
+@supports not (height: 1svh) {
+  .hero {
+    min-height: 100vh;
+    /* Compensa a barra do Safari subtraindo ~74px (altura da barra) */
+    min-height: calc(100vh - 74px);
+  }
+
+  .cover {
+    min-block-size: 100vh;
+    min-block-size: calc(100vh - 74px);
+  }
+
+  .navbar__drawer {
+    height: calc(100vh - 60px); /* fallback sem svh */
+  }
+}
+
+/* ─────────────────────────────────────────────────
+   6. CONTAINER QUERIES — fallback para iOS < 16
+   
+   Em Safari < 16, container queries são ignoradas.
+   Usamos @supports para fornecer fallback com
+   media queries tradicionais.
+───────────────────────────────────────────────── */
+@supports not (container-type: inline-size) {
+
+  /* Navbar: hamburger sempre visível em telas pequenas */
+  @media (max-width: 700px) {
+    .navbar__menu {
+      display: none;
+    }
+    .navbar__toggle {
+      display: inline-flex;
+    }
+  }
+
+  @media (min-width: 701px) {
+    .navbar__menu {
+      display: flex;
+    }
+    .navbar__toggle {
+      display: none;
+    }
+    .navbar__drawer {
+      clip-path: inset(0 0 100% 0) !important;
+      pointer-events: none;
+    }
+  }
+
+  /* Cards grid: 1 coluna no mobile, 2 no tablet, 3 no desktop */
+  @media (max-width: 479px) {
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (min-width: 480px) and (max-width: 799px) {
+    .cards-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (min-width: 800px) {
+    .cards-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* Service card: layout padrão sem subgrid */
+  @media (max-width: 279px) {
+    .service-card { padding: var(--space-6); }
+    .service-card__title { font-size: var(--text-xl); }
+  }
+
+  /* Feature: empilha em mobile */
+  @media (max-width: 639px) {
+    .feature {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Footer grid */
+  @media (max-width: 479px) {
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (min-width: 480px) {
+    .footer-grid { grid-template-columns: 2fr repeat(2, 1fr); }
+  }
+}
+
+/* ─────────────────────────────────────────────────
+   7. SCROLL-DRIVEN ANIMATIONS — fallback iOS < 18
+   
+   Safari 18 (iOS 18) tem suporte parcial.
+   Antes disso, as animações scroll-driven são ignoradas.
+   Garantimos que os elementos fiquem visíveis.
+───────────────────────────────────────────────── */
+@supports not (animation-timeline: scroll()) {
+  /* Elementos com reveal ficam visíveis sem animação */
+  .reveal,
+  .reveal-wipe,
+  .reveal-right,
+  .reveal-left,
+  .reveal-emerge,
+  .card-reveal,
+  .stat-reveal,
+  .stagger-reveal > *,
+  .stagger-list > *,
+  .hero__heading,
+  .hero__kicker,
+  .hero__subheading,
+  .hero__actions,
+  .hero__stats,
+  .section__eyebrow::before {
+    animation: none !important;
+    opacity: 1 !important;
+    translate: none !important;
+    scale: none !important;
+    clip-path: none !important;
+    filter: none !important;
+  }
+
+  /* Scroll progress: esconde — não funciona sem scroll-driven */
+  .scroll-progress {
+    display: none;
+  }
+
+  /* Header scroll: sem animação scroll-driven */
+  .header {
+    animation: none;
+  }
+
+  /* Parallax: sem movimento */
+  .parallax-slow,
+  .parallax-fast,
+  .headline-parallax {
+    animation: none;
+    translate: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────
+   8. IMAGENS — previne overflow no iOS
+───────────────────────────────────────────────── */
+img,
+video,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Previne que imagens no hero causem overflow */
+.hero__visual img {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  margin-inline: auto;
+  display: block;
+}
+
+/* ─────────────────────────────────────────────────
+   9. FORM INPUTS — previne zoom automático no iOS
+   
+   iOS faz zoom automático em inputs com font-size < 16px.
+   Garantimos mínimo de 16px nos inputs.
+───────────────────────────────────────────────── */
+.form__input,
+.form__textarea,
+.form__select {
+  font-size: max(16px, var(--text-sm)); /* nunca menor que 16px */
+}
+
+/* ─────────────────────────────────────────────────
+   10. TICKER — touch scroll desabilitado
+   
+   No iOS, o ticker não deve permitir scroll horizontal
+   acidental na área do marquee.
+───────────────────────────────────────────────── */
+.ticker-container {
+  touch-action: pan-y; /* permite scroll vertical, bloqueia horizontal */
+}
+
+.ticker-track {
+  /* Garante que a animação use GPU no iOS */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform; /* apenas no ticker — animação contínua justifica */
+}
+
+/* ─────────────────────────────────────────────────
+   11. SAFE AREA — notch e home indicator do iPhone
+───────────────────────────────────────────────── */
+
+/* Padding bottom do body para home indicator */
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* WhatsApp button acima do home indicator */
+.whatsapp-btn {
+  bottom: max(var(--space-8), calc(var(--space-8) + env(safe-area-inset-bottom)));
+  right: max(var(--space-8), calc(var(--space-8) + env(safe-area-inset-right)));
+}
+
+/* Footer com padding para home indicator */
+.footer {
+  padding-bottom: max(var(--space-8), calc(var(--space-8) + env(safe-area-inset-bottom)));
+}
+
+/* ─────────────────────────────────────────────────
+   12. BODY LOCK — quando drawer está aberto no iOS
+   
+   overflow: hidden no body sozinho não trava scroll
+   no iOS. Precisamos de position: fixed.
+   O JS alterna a classe .body-locked.
+───────────────────────────────────────────────── */
+body.body-locked {
+  position: fixed;
+  width: 100%;
+  /* Preserva a posição de scroll atual — JS deve setar top */
+  overflow: hidden;
+}

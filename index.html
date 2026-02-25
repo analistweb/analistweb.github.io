@@ -95,6 +95,8 @@
   <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/dark-mode.css">
+  <link rel="stylesheet" href="css/ios-patch.css">
+<link rel="stylesheet" href="css/video-bg.css"> <!-- ← aqui -->
 
   <!-- Dados estruturados JSON-LD -->
   <script type="application/ld+json">
@@ -253,6 +255,42 @@
          HERO
     ───────────────────────────────────────────── -->
     <section class="hero section--hero" id="hero" data-section>
+
+      <!-- ── VIDEO BACKGROUND ─────────────────────
+           Camada 0: abaixo de tudo.
+           autoplay + muted + playsinline = obrigatório para iOS.
+           preload="none" = não baixa o vídeo antes de precisar.
+           poster = imagem mostrada antes do vídeo carregar
+                    e em prefers-reduced-motion.
+      ───────────────────────────────────────────── -->
+      <div class="hero__video-bg" aria-hidden="true">
+        <video
+          class="hero__video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="none"
+          poster="images/logoanalisti1-Photoroom.png">
+          <!--
+            Forneça o vídeo em dois formatos para cobertura máxima:
+            WebM  → Chrome, Firefox, Edge (menor tamanho)
+            MP4   → Safari, iOS (mais compatível)
+
+            Especificações recomendadas:
+            → Duração: 10–20 segundos em loop
+            → Resolução: 1920×1080 máximo
+            → Sem áudio (muted de qualquer forma)
+            → WebM: ~2–4MB | MP4: ~4–8MB
+          -->
+          <source src="videos/hero-bg.webm" type="video/webm">
+          <source src="videos/856978-hd_1920_1080_24fps.mp4"  type="video/mp4">
+        </video>
+
+        <!-- Overlay escurece o vídeo para o texto ficar legível -->
+        <div class="hero__video-overlay"></div>
+      </div>
+
       <div class="hero__layout container--wide">
 
         <div class="hero__content flow">
