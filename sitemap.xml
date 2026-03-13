@@ -1,21 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset
-      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Sitemap atualizado para AnalistWeb -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
+  <!-- Página principal -->
   <url>
     <loc>https://analistweb.github.io/</loc>
-    <lastmod>2026-02-22</lastmod>
-    <priority>1.00</priority>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
   </url>
 
-  <!-- Adicione outras páginas abaixo, se houver -->
-  <!-- Exemplo:
+  <!-- Artigo: O que é SEO -->
   <url>
-    <loc>https://analistweb.github.io/sobre.html</loc>
-    <lastmod>2026-02-22</lastmod>
-    <priority>0.80</priority>
+    <loc>https://analistweb.github.io/artigos/o-que-e-seo.html</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
-  -->
+
+  <!-- Artigo: Guia SEO 2026 -->
+  <url>
+    <loc>https://analistweb.github.io/artigos/guia-seo-2026.html</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Artigo: Como aparecer em IA -->
+  <url>
+    <loc>https://analistweb.github.io/artigos/como-aparecer-em-ia.html</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Artigo: SEO para GitHub Pages -->
+  <url>
+    <loc>https://analistweb.github.io/artigos/seo-para-github-pages.html</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
 
 </urlset>
